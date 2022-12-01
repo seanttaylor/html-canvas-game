@@ -34,7 +34,7 @@ bottle.factory('myApp', async function (container) {
   const playerPlugin = container.Plugins.Player;
   const configPlugin = container.Plugins.Config;
 
-  /******** INITIALIZE CONTEXT(S) ********/
+  /******** INITIALIZE DRAWING CONTEXT(S) ********/
 
   playerPlugin.setContext(CONTEXT);
   mapPlugin.setContext(CONTEXT);
@@ -66,15 +66,14 @@ bottle.factory('myApp', async function (container) {
    * Renders individual game objects
    */
   function render() {
-    playerPlugin.render(playerTank);
     mapPlugin.render();
+    playerPlugin.render();
   }
 
   /**
    * Triggers rendering of game objects every frame
    */
   function animLoop(e) {
-    mapPlugin.render();
     clearCanvas(CanvasCoordinateConfiguration(playerTank.getSprite()));
     playerTank.moveUp();
 

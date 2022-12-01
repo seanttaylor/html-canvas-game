@@ -9,16 +9,16 @@ function PluginPlayer({ config, canvas }) {
   let frameIndex = 0;
   let context = null;
   let myTileMap = null;
+  let myPlayerTank = null;
 
   /**
    * Animates the player's tank
-   * @param {Object} playerTank - an instance of the TankAPI interface
    */
-  function render(playerTank) {
+  function render() {
     // See HTML5 Canvas 2nd Ed., Fulton pp. ~ 147
     const tileSrcX = Math.floor(ANIMATION_FRAMES[frameIndex] % 8) * 32;
     const tileSrcY = Math.floor(ANIMATION_FRAMES[frameIndex] / 8) * 32;
-    const mySprite = playerTank.getSprite();
+    const mySprite = myPlayerTank.getSprite();
 
     const source = CanvasCoordinateConfiguration({
       x: tileSrcX,
@@ -54,7 +54,7 @@ function PluginPlayer({ config, canvas }) {
    * @returns {Object}
    */
   function TankAPI(sprite) {
-    return {
+    const instance = {
       setXVelocity(vx) {
         sprite.vx = vx;
         sprite.x += vx;
@@ -91,6 +91,10 @@ function PluginPlayer({ config, canvas }) {
         sprite.y += sprite.vy;
       },
     };
+
+    myPlayerTank = Object.assign({}, instance);
+
+    return instance;
   }
 
   /**
