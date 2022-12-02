@@ -75,7 +75,8 @@ bottle.factory('myApp', async function (container) {
    */
   function animLoop(e) {
     clearCanvas(CanvasCoordinateConfiguration(playerTank.getSprite()));
-    playerTank.moveUp();
+    // playerTank.rotate(90);
+    // playerTank.moveRight();
 
     WINDOW.setTimeout(animLoop, 100);
     render();
@@ -106,30 +107,22 @@ bottle.factory('myApp', async function (container) {
 
     // Up
     if (keys.MOVE_UP && !keys.MOVE_DOWN) {
-      //PLAYER_TANK.y += -5;
-      //player.moveDown(5);
-      // cat.vy = -5;
+      playerTank.moveUp();
     }
 
     // Down
     if (keys.MOVE_DOWN && !keys.MOVE_UP) {
-      //PLAYER_TANK.y += 1;
-      //player.moveDown(5);
-      // cat.vy = 5;
+      playerTank.moveDown();
     }
 
     // Left
     if (keys.MOVE_LEFT && !keys.MOVE_RIGHT) {
-      //PLAYER_TANK.x += -5;
-      //player.moveLeft(-5);
-      // cat.vx = -5;
+      playerTank.moveLeft();
     }
 
     // Right
     if (keys.MOVE_RIGHT && !keys.MOVE_LEFT) {
-      //PLAYER_TANK.x += 5;
-      //player.moveRight(5);
-      // cat.vx = 5;
+      playerTank.moveRight();
     }
   }
 

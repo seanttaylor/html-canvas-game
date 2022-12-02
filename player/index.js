@@ -10,30 +10,95 @@ function PluginPlayer({ config, canvas }) {
   let context = null;
   let myTileMap = null;
   let myPlayerTank = null;
+  let currentRenderStrategy = DefaultRenderStrategy();
+
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {HTMLImageElement} tileMap
+   * @param {Object} sourceTile
+   * @param {SpriteConfiguration} sprite
+   * @returns {Function}
+   */
+  function DefaultRenderStrategy() {
+    return function ({ ctx, sourceTile, sprite, tileMap }) {
+      const source = CanvasCoordinateConfiguration({
+        x: sourceTile.x,
+        y: sourceTile.y,
+        width: 32,
+        height: 32,
+      });
+
+      const dest = CanvasCoordinateConfiguration({
+        x: sprite.x,
+        y: sprite.y,
+        width: 32,
+        height: 32,
+      });
+
+      ctx.drawImage(tileMap, ...[...source, ...dest]);
+      ctx.restore();
+    };
+  }
+
+  /**
+   * @param {Number} rotation
+   * @returns {Function}
+   */
+  function RotateRenderStrategy(rotation) {
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {HTMLImageElement} tileMap
+     * @param {Object} sourceTile
+     * @param {SpriteConfiguration} sprite
+     */
+    return function ({ ctx, sourceTile, sprite, tileMap }) {
+      const { x: srcX, y: srcY } = sourceTile;
+      const source = CanvasCoordinateConfiguration({
+        x: srcX,
+        y: srcY,
+        width: 32,
+        height: 32,
+      });
+
+      const dest = CanvasCoordinateConfiguration({
+        x: sprite.x,
+        y: sprite.y,
+        width: 32,
+        height: 32,
+      });
+
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.translate(sprite.x + 16, sprite.y + 16);
+
+      const angleInRadians = (rotation * Math.PI) / 180;
+
+      ctx.rotate(angleInRadians);
+      ctx.drawImage(tileMap, srcX, srcY, 32, 32, -16, -16, 32, 32);
+      ctx.restore();
+    };
+  }
 
   /**
    * Animates the player's tank
    */
-  function render() {
+  function render(fn) {
     // See HTML5 Canvas 2nd Ed., Fulton pp. ~ 147
     const tileSrcX = Math.floor(ANIMATION_FRAMES[frameIndex] % 8) * 32;
     const tileSrcY = Math.floor(ANIMATION_FRAMES[frameIndex] / 8) * 32;
     const mySprite = myPlayerTank.getSprite();
 
-    const source = CanvasCoordinateConfiguration({
-      x: tileSrcX,
-      y: tileSrcY,
-      width: 32,
-      height: 32,
-    });
-    const dest = CanvasCoordinateConfiguration({
-      x: mySprite.x,
-      y: mySprite.y,
-      width: 32,
-      height: 32,
+    currentRenderStrategy({
+      ctx: context,
+      sprite: mySprite,
+      sourceTile: {
+        x: tileSrcX,
+        y: tileSrcY,
+      },
+      tileMap: myTileMap,
     });
 
-    context.drawImage(myTileMap, ...[...source, ...dest]);
+    currentRenderStrategy = DefaultRenderStrategy();
 
     frameIndex++;
 
@@ -89,6 +154,12 @@ function PluginPlayer({ config, canvas }) {
       moveDown(y = 1) {
         sprite.vy = y;
         sprite.y += sprite.vy;
+      },
+      /**
+       * @param {Number} rotation - number of degrees to rotate the tank
+       */
+      rotate(rotation) {
+        currentRenderStrategy = RotateRenderStrategy(rotation);
       },
     };
 
